@@ -743,7 +743,7 @@ def finalize_turn(
     # External memory provider: sync the completed turn + queue next prefetch.
     agent._sync_external_memory_for_turn(
         original_user_message=original_user_message, final_response=final_response,
-        interrupted=interrupted, messages=messages,
+        completed=completed, interrupted=interrupted, messages=messages,
     )
 
     # Background memory/skill review runs AFTER delivery so it never competes with the

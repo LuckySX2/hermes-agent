@@ -915,12 +915,13 @@ class AIAgent(
             _quietly(lambda: self._memory_manager.on_session_end(messages or []))
         _notify_context_engine_session_end(self, messages)
 
-    def _sync_external_memory_for_turn(self, *, original_user_message: Any, final_response: Any, interrupted: bool,
-                                       messages: list | None = None) -> None:
-        """Mirror a completed turn into external memory providers (``sync_all`` + ``queue_prefetch_all``).
+    def _sync_external_memory_for_turn(self, *, original_user_message: Any, final_response: Any, completed: bool,
+                                       interrupted: bool, messages: list | None = None) -> None:
+        """Mirror a successfully completed turn into external memory providers.
 
         Uses ``original_user_message`` (``user_message`` may carry injected skill content). Interrupted turns
-        are skipped: partial output is not durable truth. Best-effort — an offline backend never blocks.
+        and failed turns are skipped: partial output is not durable truth. Best-effort — an offline backend
+        never blocks.
 
         A partial assistant output, an aborted tool chain, or a mid-stream reset is not durable
         conversational truth — mirroring it into an external memory backend pollutes future recall with
@@ -928,7 +929,7 @@ class AIAgent(
         is almost certainly a retry of the same intent, and a prefetch keyed on the interrupted turn would
         fire against stale context. See #15218.
         """
-        if interrupted or not (self._memory_manager and final_response and original_user_message):
+        if interrupted or not completed or not (self._memory_manager and final_response and original_user_message):
             return
         # Flatten multimodal parts to text (newline-joined for memory).
         user_text = _summarize_user_message_for_log(original_user_message, sep="\n")

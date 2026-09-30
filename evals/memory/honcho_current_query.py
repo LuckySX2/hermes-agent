@@ -127,7 +127,7 @@ def begin(a, turn, query):
 
 def end(a, query):
     AIAgent._sync_external_memory_for_turn(a, original_user_message=query,
-        final_response="Fixture answer; no LLM called.", interrupted=False)
+        final_response="Fixture answer; no LLM called.", completed=True, interrupted=False)
 
 
 def settle(p):

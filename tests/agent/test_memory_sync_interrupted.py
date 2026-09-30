@@ -47,7 +47,20 @@ class TestSyncExternalMemoryForTurn:
         agent._sync_external_memory_for_turn(
             original_user_message="What time is it?",
             final_response="It is 3pm.",  # looks complete — but partial
+            completed=True,
             interrupted=True,
+        )
+        agent._memory_manager.sync_all.assert_not_called()
+        agent._memory_manager.queue_prefetch_all.assert_not_called()
+
+    def test_failed_non_interrupted_turn_does_not_sync(self):
+        """A failed turn with complete-looking content must not reach memory."""
+        agent = _bare_agent()
+        agent._sync_external_memory_for_turn(
+            original_user_message="What time is it?",
+            final_response="It is 3pm.",
+            completed=False,
+            interrupted=False,
         )
         agent._memory_manager.sync_all.assert_not_called()
         agent._memory_manager.queue_prefetch_all.assert_not_called()
@@ -59,9 +72,11 @@ class TestSyncExternalMemoryForTurn:
         agent._turn_author = {"id": "bot:alpha", "name": "Alpha", "is_bot": True}
 
         agent._sync_external_memory_for_turn(
-            original_user_message="Message from Alpha: status?", final_response="All green.", interrupted=False,
+            original_user_message="Message from Alpha: status?", final_response="All green.", completed=True,
+            interrupted=False,
         )
 
+        agent._memory_manager.sync_all.assert_called_once()
         kwargs = agent._memory_manager.sync_all.call_args.kwargs
         assert kwargs["turn_author"] == {"id": "bot:alpha", "name": "Alpha", "is_bot": True}
         assert kwargs["session_id"] == "test_session_001"

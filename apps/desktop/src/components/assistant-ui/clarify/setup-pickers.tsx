@@ -259,7 +259,7 @@ export function SetupIntentRows({
 }
 
 const PILL_CLASS =
-  'flex max-w-full shrink-0 items-center rounded-full border px-3 py-1 text-left text-[12px] whitespace-normal wrap-anywhere transition-colors disabled:cursor-not-allowed disabled:opacity-50'
+  'flex max-w-full shrink-0 items-center gap-1.5 rounded-full border px-3 py-1 text-left text-[12px] whitespace-normal wrap-anywhere transition-colors disabled:cursor-not-allowed disabled:opacity-50'
 
 const PILL_CURSOR_CLASS = 'ring-2 ring-ring/60 ring-offset-2 ring-offset-(--dt-background)'
 
@@ -271,6 +271,7 @@ export function QuestionPills({
   onDraft,
   onOtherFocus,
   onPick,
+  onRowFocus,
   question,
   staged
 }: {
@@ -281,6 +282,7 @@ export function QuestionPills({
   onDraft: (value: string) => void
   onOtherFocus: () => void
   onPick: (index: number) => void
+  onRowFocus: (index: number) => void
   question: ClarifyQuestion
   staged: { choices: string[]; draft: string }
 }) {
@@ -320,11 +322,16 @@ export function QuestionPills({
               disabled={disabled}
               key={`${index}-${choice}`}
               onClick={() => onPick(index)}
+              onFocus={() => onRowFocus(index)}
+              onPointerEnter={() => onRowFocus(index)}
               type="button"
             >
               <span>
                 <ChoiceLabel choice={choice} />
               </span>
+              {details[index] ? (
+                <span aria-hidden className="size-1 shrink-0 rounded-full bg-current opacity-60" />
+              ) : null}
             </button>
           )
         })}
@@ -351,7 +358,11 @@ export function QuestionPills({
         </label>
       </div>
       {details.some(Boolean) ? (
-        <p className="h-4 truncate px-1 text-xs leading-4 text-(--ui-text-tertiary)" id={detailId}>
+        <p
+          className="h-4 truncate px-1 text-xs leading-4 text-(--ui-text-tertiary)"
+          id={detailId}
+          title={detail ?? undefined}
+        >
           {detail}
         </p>
       ) : null}

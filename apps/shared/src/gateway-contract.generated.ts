@@ -3540,9 +3540,11 @@ export interface LlmOneshotParams {
 export interface LlmOneshotResult {
   text: string
 }
+/** ``tool_call_id`` names the rejected call; its saved tool row records a started retry (display-only). */
 export interface SessionStartChatParams {
   session_id: string
   profile?: string | null
+  tool_call_id: string
   args: StartChatArgs
 }
 /** The ``start_chat`` tool's arguments (``tools/start_chat_tool.py``). */
@@ -3551,7 +3553,7 @@ export interface StartChatArgs {
   title?: string | null
   profile?: string | null
 }
-/** ``tui_gateway/start_chat.py``: ``started`` carries the new chat, ``rejected`` a reason. */
+/** ``tui_gateway/start_chat.py``: ``started`` carries the new chat, ``rejected`` a reason and whether the same arguments may succeed on another try (``retryable``). A call already retried returns that retry's result. */
 export interface SessionStartChatResult {
   status: StartChatStatus
   session_id?: string | null
@@ -3559,6 +3561,7 @@ export interface SessionStartChatResult {
   title?: string | null
   message?: string | null
   reason?: string | null
+  retryable?: boolean | null
 }
 export type StartChatStatus = 'started' | 'rejected'
 export interface SystemBatteryParams {

@@ -54,6 +54,16 @@ def test_portable_install_gate_accepts_present_app_and_refuses_missing(tmp_path:
         _refuse_unavailable_portable_plugin("example-plugin", tmp_path)
 
 
+def test_portable_install_gate_respects_native_manifest_precedence(tmp_path: Path) -> None:
+    (tmp_path / "plugin.json").write_text('{"name": "example-plugin"}', encoding="utf-8")
+    native = tmp_path / "plugin.yaml"
+    native.write_text("name: example-plugin\nversion: 1.0.0\n", encoding="utf-8")
+    _refuse_unavailable_portable_plugin("example-plugin", tmp_path)
+    native.unlink()
+    with pytest.raises(PluginOperationError, match="unsupported or missing Agent Plugins schema"):
+        _refuse_unavailable_portable_plugin("example-plugin", tmp_path)
+
+
 # ── _sanitize_plugin_name ─────────────────────────────────────────────────
 
 
